@@ -1,0 +1,55 @@
+services:
+  paginaSensores:
+    container_name: paginaSensoresContainer
+    image: node:22.14.0-alpine3.21
+    volumes:
+      - ../../..:/workspaces:cached
+    command: sleep infinity
+    depends_on:
+      - mysql
+    networks:
+      - paginaSensores
+  mysql:
+    image: mysql:9
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql_config/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - paginaSensores
+
+  php:
+    build: .
+    container_name: php_container
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./www:/var/www/html
+    depends_on:
+      - mysql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_container
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: rootpassword
+    depends_on:
+      - mysql
+    networks:
+      - paginaSensores
+
+volumes:
+  mysql_data:
+networks:
+  paginaSensores:

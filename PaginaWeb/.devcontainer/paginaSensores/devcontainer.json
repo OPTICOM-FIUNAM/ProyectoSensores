@@ -1,0 +1,30 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
+{
+	"name": "Pagina Sensores",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "paginaSensores",
+	"workspaceFolder": "/workspaces/paginaSensores/src/app",	
+	"shutdownAction": "stopCompose",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"PulkitGangwar.nextjs-snippets",
+				"vscodeshift.mui-snippets",
+				"ms-azuretools.vscode-docker"
+			],
+			"settings": {
+				"workbench.colorTheme": "Default Dark Modern"
+			}
+		}
+	},
+	"forwardPorts": [3000],
+	"portsAttributes": {
+		"3000": {
+			"label": "Página Sensores",
+			"protocol": "http"
+		}
+	},
+	"postStartCommand": "cd /workspaces/paginaSensores/ && npm run dev"
+}
