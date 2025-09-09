@@ -1,3 +1,4 @@
+//pagina "acerca de"
 import Image from 'next/image';
 import { Box, Divider, Grid, Typography } from '@mui/material';
 import React from "react";
