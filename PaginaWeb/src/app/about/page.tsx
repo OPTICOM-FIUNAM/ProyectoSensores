@@ -1,4 +1,4 @@
-//pagina "acerca de" "Modificacion 1"
+//pagina "acerca de", sub pagina de la principal
 import Image from 'next/image';
 import { Box, Divider, Grid, Typography } from '@mui/material';
 import React from "react";
