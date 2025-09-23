@@ -37,7 +37,9 @@ const Logos = () => {
                             gap: '15px'
                         }}
                     >
-                        <Image src = {'/LogoOpticom.png'} width={150} height={150} alt="..."/>
+                        <Link href="https://www.instagram.com/opticom.unam/?igsh=bGZrMDNoczFwcHRu#" target="_blank">
+                            <Image src = {'/LogoOpticom.png'} width={150} height={150} alt="..."/>
+                        </Link>
                         <Link href="https://www.fi-b.unam.mx/" target="_blank">
                             <Image src = {'/LogoDIE.png'} width={150} height={100} alt="..."/>
                         </Link>
@@ -104,7 +106,37 @@ const Logos = () => {
                     padding: '5px 0',
                 }}
             >
-                Copyrights © 2025 / OPTICOM / Facultad de Ingeniería / UNAM
+                Copyrights © 2025 
+                / 
+                <Link 
+                    href="https://www.instagram.com/opticom.unam/?igsh=bGZrMDNoczFwcHRu#" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    underline="none" 
+                    color="inherit"
+                >
+                    OPTICOM
+                </Link>
+                /
+                <Link 
+                    href="https://www.ingenieria.unam.mx/" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    underline="none" 
+                    color="inherit"
+                >
+                    Facultad de Ingeniería
+                </Link>
+                /
+                <Link 
+                    href="https://www.unam.mx" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    underline="none" 
+                    color="inherit"
+                >
+                    UNAM
+                </Link>
             </Box>
         </Box>
     );

@@ -14,27 +14,30 @@ const Tarjeta = ({name, degree, image}) => {
             borderRadius: '100px',
         }}
         />
-        <Typography
-        sx={{
-            textAlign: 'center',
-            fontWeight: 'bold',
-            color: 'black',
-            fontSize: '15px',
-        }} 
-        >
-            {name}
-        </Typography>
+        <Box>
+            <Typography
+            sx={{
+                textAlign: 'center',
+                fontWeight: 'bold',
+                color: 'black',
+                fontSize: '15px',
+            }} 
+            >
+                {name}
+            </Typography>
 
-        <Typography
-        sx={{
-            textAlign: 'center',
-            fontStyle: 'italic',
-            color: 'black',
-            fontSize: '15px',
-        }} 
-        >
-            {degree}
-        </Typography>
+            <Typography
+            sx={{
+                textAlign: 'center',
+                fontStyle: 'italic',
+                color: 'black',
+                fontSize: '15px',
+            }} 
+            >
+                {degree}
+            </Typography>
+        </Box>
+
 </>
     );
 }

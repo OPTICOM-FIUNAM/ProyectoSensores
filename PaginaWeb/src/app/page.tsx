@@ -54,7 +54,7 @@ export default function Home() {
           position: "relative",
           }}
         >
-        <Image src={'/LogoOpticom.png'} width={0} height={0} alt="..." layout="responsive"/>
+        <Image src={'/Logonuevo.png'} width={0} height={0} alt="..." layout="responsive"/>
         </Grid>
 
         <Grid size={6}
@@ -71,7 +71,7 @@ export default function Home() {
               //fontWeight: 'bold',
               color: 'black',
               textAlign: 'justify',
-              fontSize: '20px'
+              fontSize: '25px'
             }}
           >
             Este proyecto tiene como objetivo medir la cantidad de agua utilizada en los baños y mingitorios de la Facultad de Ingeniería, con el fin de recabar información sobre su consumo. A partir de estos datos, se busca diseñar e implementar un sistema de captación pluvial que contribuya al uso más eficiente del recurso hídrico.

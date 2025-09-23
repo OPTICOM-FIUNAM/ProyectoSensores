@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid, Link, Typography } from '@mui/material';
 
 const Logos = () => {
 	return (
@@ -33,9 +33,21 @@ const Logos = () => {
 						gap: '5px'
 					}}
 				>
-					<Image src = {'/LogoUNAM.png'} width={85} height={95} alt="..."/>
-					<Image src = {'/LogoFI.png'} width={85} height={95} alt="..."/>
+					<Link href="https://www.unam.mx" target="_blank">
+                            <Image src = {'/LogoUNAM.png'} width={85} height={95} alt="..." title='UNAM'/>
+                    </Link>
+					<Link href="https://www.ingenieria.unam.mx/"  target="_blank">
+                            <Image src = {'/LogoFI.png'} width={85} height={95} alt="..." title='Facultad de Ingeniería'/>
+                    </Link>
 					<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
+						<Link
+							href="https://www.ingenieria.unam.mx/" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            underline="none" 
+                            color="inherit"
+							title='UNAM'
+						>
 						<Typography
 							sx={{
 								fontFamily: 'sans-serif',
@@ -57,6 +69,7 @@ const Logos = () => {
 						>
 							Ingeniería
 						</Typography>
+						</Link>
 					</Box>
 				</Grid>
 
@@ -67,11 +80,19 @@ const Logos = () => {
 						display: 'flex',
 						justifyContent: 'center',
 						alignItems: 'center',
-						gap: '15px'
 					}}
 				>
-					<Image src = {'/Logonuevo.png'} width={110} height={110} alt="..."/>
-					<Image src = {'/LETRASOPTICOM.png'} width={300} height={50} alt="..."/>
+					<Link
+						href="https://www.instagram.com/opticom.unam/?igsh=bGZrMDNoczFwcHRu#" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        underline="none" 
+                        color="inherit"
+						title='OPTICOM'
+					>
+						<Image src = {'/logoCOpticom.png'} width={120} height={100} alt="..."/>
+						<Image src = {'/TipografiaOpticom.png'} width={300} height={50} alt="..."/>
+					</Link>
 				</Grid>
 			</Grid>
 		</Box>
