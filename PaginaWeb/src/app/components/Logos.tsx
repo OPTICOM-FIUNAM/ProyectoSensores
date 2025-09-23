@@ -30,17 +30,34 @@ const Logos = () => {
 						display: 'flex',
 						justifyContent: 'center',
 						alignItems: 'center',
-						gap: '15px'
+						gap: '5px'
 					}}
 				>
-					<Image src = {'/LogoUNAM.png'} width={80} height={80} alt="..."/>
-					<Typography
-						sx={{
-							fontWeight: 'bold'
-						}}
-					>
-						Universidad Nacional <br/> Autónoma México
-					</Typography>
+					<Image src = {'/LogoUNAM.png'} width={85} height={95} alt="..."/>
+					<Image src = {'/LogoFI.png'} width={85} height={95} alt="..."/>
+					<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
+						<Typography
+							sx={{
+								fontFamily: 'sans-serif',
+								fontWeight: 'normal',
+								fontSize: '20px',
+								color: 'primary.main',
+								mb: -1
+							}}
+						>
+							Facultad de
+						</Typography>
+						<Typography
+							sx={{
+								fontWeight: 'bolder',
+								fontSize: '28px',
+								color: 'primary.main',
+								mt: -0.5
+							}}
+						>
+							Ingeniería
+						</Typography>
+					</Box>
 				</Grid>
 
 				<Grid size={6}
@@ -53,15 +70,8 @@ const Logos = () => {
 						gap: '15px'
 					}}
 				>
-					<Typography
-						sx={{
-							fontWeight: 'bold',
-							color: 'primary.main'
-						}}
-					>
-						Facultad de Ingeniería
-					</Typography>
-					<Image src = {'/LogoFI.png'} width={80} height={85} alt="..."/>
+					<Image src = {'/Logonuevo.png'} width={110} height={110} alt="..."/>
+					<Image src = {'/LETRASOPTICOM.png'} width={300} height={50} alt="..."/>
 				</Grid>
 			</Grid>
 		</Box>

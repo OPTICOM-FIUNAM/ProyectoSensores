@@ -5,7 +5,7 @@ import Tarjeta from './Tarjeta';
 import Estudiantes from './Estudiantes';
 
 const Participantes = () => {
-    const lider = [{name:'M.I. Christian Hernández Santiago',degree:'Ingeniería en Telecomunicaciones',image:'/Sonrriente.jpg'},{name:'M.I. Cristian Emmanuel González Reyes',degree:'Ingeniería Civil',image:'/Sonrriente.jpg'}, {name:'M.I. Christian Hernández Santiago A',degree:'Ingeniería en Telecomunicaciones',image:'/Sonrriente.jpg'}]
+    const lider = [{name:'M.I. Christian Hernández Santiago',degree:'Ingeniería en Telecomunicaciones',image:'/CHR.jpeg'},{name:'M.I. Cristian Emmanuel González Reyes',degree:'Ingeniería Civil',image:'/CRI.jpeg'}, {name:'M.I. Christian Hernández Santiago A',degree:'Ingeniería en Telecomunicaciones',image:'/Sonrriente.jpg'}]
 
     const students = [{name:'Ileana Angélica Cordero Martínez',career:'Ingeniería en Computación'},{name:'Angel Uriel Pineda Migranas',career:'Ingeniería en Computación'}, {name:'André Carreño Limones',career:'Ingeniería en Computación'},{name:'Guillermo Cruz',career:'Ingeniería Aeroespacial'},{name:'Iván Arturo Olvera Martínez',career:'Ingeniería Eléctrica Electrónica'}, {name:'Ana Cristina Ramírez Monzón',career:'Ingeniería en Computación'}]
 

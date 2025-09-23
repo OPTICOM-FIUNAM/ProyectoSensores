@@ -1,70 +1,111 @@
+//import Link from 'next/link';
 import Image from 'next/image';
 
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid, Link, Typography } from '@mui/material';
 
 const Logos = () => {
     return (
-        <Box
-            sx={{
-                //border:'2px solid black',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                color:'black',
-                backgroundColor:'#D9D9D9',
-                borderTop: '20px solid #e20e0e',
-                height:'fit-content',
-                padding: '10px',
-                marginTop: '20px',
-            }}
-        >
-            <Grid container
+        <Box sx={{ backgroundColor: '#333', color: 'white' }}>
+            <Box
                 sx={{
                     //border:'2px solid black',
-                    width: '100%',
-                    height: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    color:'black',
+                    backgroundColor:'#333',
+                    height:'160px',
+                    padding: '10px',
+                    marginTop: '20px',
                 }}
             >
-                <Grid size={6}
+                <Grid container
                     sx={{
-                        //border:'2px solid green',
-                        display: 'flex',
-                        flexWrap: 'wrap',  
-                        justifyContent: 'rigth',
-                        alignItems: 'center',
-                        gap: '15px'
+                        //border:'2px solid black',
+                        width: '100%',
+                        height: '100%',
                     }}
                 >
-                    <Image src = {'/LogoOpticom.png'} width={80} height={80} alt="..."/>
-                    <Image src = {'/LogoDIE.png'} width={80} height={40} alt="..."/>
-                    <Image src = {'/LogoDICyG.png'} width={70} height={70} alt="..."/>
-                    <Image src = {'/LogoDiCT.png'} width={80} height={70} alt="..."/>
-                    <Image src = {'/LogoUAT.png'} width={70} height={60} alt="..."/>
-                </Grid>
-
-                <Grid size={6}
-                    sx={{
-                        //border:'2px solid green',
-						display: 'flex',
-						justifyContent: 'center',
-						alignItems: 'center',
-                    }}
-                >
-                    <Typography
+                    <Grid size={6}
                         sx={{
-                            //fontWeight: 'bold',
-                            fontSize: '12px',
+                            //border:'2px solid green',
+                            display: 'flex',
+                            flexWrap: 'wrap',  
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: '15px'
                         }}
                     >
-                        Universidad Nacional Autónoma de México
-                        <br/>
-                        Facultad de Ingeniería, Av. Universidad 3000, Ciudad Universitaria, Coyoacán, Cd. Mx., CP 04510
-                        <br/> <br/>
-                        Copyrights © 2025 
-                    </Typography>
+                        <Image src = {'/LogoOpticom.png'} width={150} height={150} alt="..."/>
+                        <Link href="https://www.fi-b.unam.mx/" target="_blank">
+                            <Image src = {'/LogoDIE.png'} width={150} height={100} alt="..."/>
+                        </Link>
+                        <Link href="http://dicyg.fi-c.unam.mx:8080/Site" target="_blank">
+                            <Image src = {'/LogoDICyG.png'} width={110} height={110} alt="..."/>
+                        </Link>
+                        <Link href="http://www.dict.unam.mx/" target="_blank">
+                            <Image src = {'/LogoDiCT.png'} width={130} height={120} alt="..."/>
+                        </Link>
+                        <Link href="https://www.ingenieria.unam.mx/uat/" target="_blank">
+                            <Image src = {'/LogoUAT.png'} width={120} height={110} alt="..."/>
+                        </Link>
+                    </Grid>
+
+                    <Grid size={6}
+                        sx={{
+                            //border:'2px solid green',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Typography
+                            sx={{
+                                //fontWeight: 'bold',
+                                fontSize: '15px',
+                                color: 'white'
+                            }}
+                        >
+                            <Link 
+                                href="https://www.unam.mx" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                underline="hover" 
+                                color="inherit"
+                            >
+                                Universidad Nacional Autónoma de México
+                            </Link>
+                            <br/>
+                            <Link 
+                                href="https://www.ingenieria.unam.mx/" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                underline="hover" 
+                                color="inherit"
+                            >
+                                Facultad de Ingeniería
+                            </Link>
+                            <br/>
+                            Direccion: Av. Universidad 3000, Ciudad Universitaria, Coyoacán, Cd. Mx.
+                            <br/>
+                            CP 04510
+                        </Typography>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Box>
+            <Box
+                sx={{
+                    width: '100%',
+                    backgroundColor: 'red',
+                    color: 'white',
+                    textAlign: 'center',
+                    fontSize: '12px',
+                    padding: '5px 0',
+                }}
+            >
+                Copyrights © 2025 / OPTICOM / Facultad de Ingeniería / UNAM
+            </Box>
         </Box>
     );
 }
