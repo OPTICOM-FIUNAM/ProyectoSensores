@@ -3,6 +3,7 @@
 - WSL o Linux (Opcional, pero es altamente recomendado debido a la compatibilidad)
 - Docker con Docker Compose
 - Git
+- GitHub Desktop(recomendable)
 
 # Página Web
 Para el desarrollo de la página web se utiliza el framework Next.JS 22.14.0.
