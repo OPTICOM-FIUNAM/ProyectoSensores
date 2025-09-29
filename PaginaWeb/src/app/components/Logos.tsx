@@ -46,7 +46,7 @@ const Logos = () => {
                             rel="noopener noreferrer" 
                             underline="none" 
                             color="inherit"
-							title='UNAM'
+							title='Facultad de Ingeniería'
 						>
 						<Typography
 							sx={{
@@ -82,17 +82,8 @@ const Logos = () => {
 						alignItems: 'center',
 					}}
 				>
-					<Link
-						href="https://www.instagram.com/opticom.unam/?igsh=bGZrMDNoczFwcHRu#" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        underline="none" 
-                        color="inherit"
-						title='OPTICOM'
-					>
-						<Image src = {'/logoCOpticom.png'} width={120} height={100} alt="..."/>
-						<Image src = {'/TipografiaOpticom.png'} width={300} height={50} alt="..."/>
-					</Link>
+					<Image src = {'/Logonuevo.png'} width={110} height={100} alt="..."/>
+					<Image src = {'/LetrasEMUSHI.png'} width={300} height={50} alt="..."/>
 				</Grid>
 			</Grid>
 		</Box>

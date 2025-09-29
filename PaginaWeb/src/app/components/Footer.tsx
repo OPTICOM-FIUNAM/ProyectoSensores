@@ -91,7 +91,7 @@ const Logos = () => {
                             <br/>
                             Direccion: Av. Universidad 3000, Ciudad Universitaria, Coyoacán, Cd. Mx.
                             <br/>
-                            CP 04510
+                            CP: 04510
                         </Typography>
                     </Grid>
                 </Grid>
