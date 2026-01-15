@@ -1,0 +1,52 @@
+#include <RobotIRremote.h>
+#include <RobotIRremoteInt.h>
+#include <RobotIRremoteTools.h>
+
+#define NUM_SENSORS 16
+const int sensorPins[NUM_SENSORS] = {12, 13, 14, 15, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33, 34, 35};
+long Count[NUM_SENSORS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int value = 0;
+unsigned long lastLogTime = 0;
+unsigned long logInterval = 10; // Tiempo entre lecturas (en ms)
+
+void setup() {
+  Serial.begin(115200);
+
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    pinMode(sensorPins[i], INPUT);
+  }
+
+  // Encabezados
+//  Serial.print("Tiempo");
+//  for (int i = 0; i < NUM_SENSORS; i++) {
+//    Serial.print("\tS"); Serial.print(i);
+//  }
+//  Serial.println();
+}
+
+void loop() {
+  unsigned long currentTime = millis();
+  if (currentTime - lastLogTime >= logInterval) {
+    lastLogTime = currentTime;
+
+    Serial.print(currentTime);
+    Serial.print("mS\t");
+    for (int i = 0; i < NUM_SENSORS; i++) {
+      Serial.print("S");
+      Serial.print(sensorPins[i]);
+      Serial.print(":");
+
+      value = digitalRead(sensorPins[i]);
+      
+      Serial.print(value);
+      Serial.print("\t");
+//      if(value==1) Count[i]+=1;
+//
+//      Serial.print(":");
+//      Serial.print(Count[i]);
+//      Serial.print(" ");
+    }
+    Serial.println();
+  }
+  delay(100);
+}
