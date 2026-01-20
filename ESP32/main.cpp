@@ -81,8 +81,20 @@ void setup()
 	Serial.print("Connecting to WiFi ");
 	while (WiFi.status() != WL_CONNECTED)
 	{
-		delay(1000);
+		delay(500);
 		Serial.print(".");
+
+		// Si se presiona una tecla en el monitor serial
+    if (Serial.available() > 0) {
+        Serial.println("\nInterrupción por teclado detectada. Saliendo de conexión WiFi.");
+        break;
+    }
+
+    // Si se alcanza el tiempo límite
+    if (millis() - startTime > timeout) {
+        Serial.println("\nTiempo de espera agotado. Saliendo de conexión WiFi.");
+        break;
+    }
 	}
 	Serial.println("Connected to WiFi ");
 	delay(500);
