@@ -4,8 +4,8 @@ import SensoresDataGrid from "../../ui/SensoresDataGrid";
 import DataGridSkeleton from '../../ui/DataGridLoading';
 import SensoresHeatMap from '../../ui/SensoresHeatMap';
 import { useSearchParams } from 'next/navigation';
-import useDischargeFilters from '../../hooks/useDischargeFilters';
-import useHeatmapData from '../../hooks/useHeatmapData';
+import useDischargeFilters from '../../Hooks/useDischargeFilters';
+import useHeatmapData from '../../Hooks/useHeatmapData';
 import { SessionProvider } from 'next-auth/react';
 import AuthStatus from '../../components/LogIn';
 
