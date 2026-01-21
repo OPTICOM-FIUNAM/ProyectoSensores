@@ -1,0 +1,10 @@
+void setup() {
+  Serial.begin(115200);
+  pinMode(Colocar pin utilzado, INPUT);
+}
+
+void loop() {
+  int estado = digitalRead(Colocar pin utilzado);
+  Serial.println(estado);
+  delay(200);
+}
