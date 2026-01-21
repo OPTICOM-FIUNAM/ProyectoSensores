@@ -27,7 +27,7 @@ fileID    = open(filename, "w")
 t0 = time.time()
 en_vibracion = False
 t_inicio = 0
-duraciones = []
+duraciones = [] 
 t_ultimo1 = 0
 
 # --- Gráfica en tiempo real ---
