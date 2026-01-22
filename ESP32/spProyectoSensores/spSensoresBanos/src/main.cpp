@@ -46,13 +46,16 @@ iria la direccion del puerto que nos dieron */
 int flag_time = 200000; // El tiempo varía dependiendo de cuántos sensores se tengan, si son muchos, disminuir el tiempo
 
 // Structura del sensor
+// Nueva estructura sugerida
 struct Sensor
 {
-	String ID;
-	String type;
-	int bandera;
+    String ID;
+    String type;
+    int bandera;          // Se mantiene para compatibilidad si es necesario
+    int pulsos;           // Contador de ráfagas detectadas en la ventana
+    unsigned long inicio; // Marca de tiempo (millis) del primer pulso
+    bool activo;          // Indica si el sensor está en su ventana de observación
 };
-
 /*estructura que controla a los sensores*/
 
 // Sensores
@@ -116,39 +119,65 @@ void setup()
 		0);			/* Core where the task should run */
 }
 
-void task0(void *parameter) {
-    for (;;) {
-        for (auto &sensor : sensores) {
+void task0(void *parameter)
+{
+    const int UMBRAL_PULSOS = 40;       // Ajustar según pruebas: pulsos mínimos para descarga real
+    const int VENTANA_TIEMPO = 250;     // Duración de la ventana en ms
+    const int LOCKOUT_TIEMPO = 2000;    // Tiempo de espera tras detección (2 segundos)
+
+    for (;;)
+    {
+        for (auto &sensor : sensores)
+        {
             bool lectura = digitalRead(sensor.first);
-            
-            // Si detecta el primer pulso, inicia una ventana de observación
-            if (lectura && !sensor.second.activo) {
+
+            // 1. Detección del primer pulso: Inicia la ventana
+            if (lectura && !sensor.second.activo && sensor.second.bandera == 0)
+            {
                 sensor.second.activo = true;
-                sensor.second.inicioDeteccion = millis();
+                sensor.second.inicio = millis();
                 sensor.second.pulsos = 0;
             }
 
-            // Durante los próximos 250ms, cuenta cuántos pulsos hay
-            if (sensor.second.activo) {
+            // 2. Durante la ventana: Contamos la densidad de vibración
+            if (sensor.second.activo)
+            {
                 if (lectura) sensor.second.pulsos++;
 
-                if (millis() - sensor.second.inicioDeteccion > 250) {
-                    // Aquí termina la ventana. 
-                    // Si pulsos > Umbral, es una posible descarga.
-                    if (sensor.second.pulsos > 50) { 
-                        // LÓGICA DE VETO: Comparar con vecinos antes de confirmar
-                        Serial.printf("Sensor %s validado con %d pulsos\n", 
-                                      sensor.second.ID.c_str(), sensor.second.pulsos);
+                // 3. Fin de la ventana: Evaluamos si fue descarga real o ruido vecino
+                if (millis() - sensor.second.inicio > VENTANA_TIEMPO)
+                {
+                    if (sensor.second.pulsos > UMBRAL_PULSOS)
+                    {
+                        // MANTENEMOS TU FORMATO ORIGINAL DE IMPRESIÓN
+                        fecha_y_hora = getDateTime();
+                        Serial.println("Descarga del sensor: " + sensor.second.ID + "\t Hora: " + fecha_y_hora + "\n");
                         
-                        // Agregar a la lista para enviar...
+                        // Opcional: imprimir densidad para calibración
+                        // Serial.println("Densidad detectada: " + String(sensor.second.pulsos) + " pulsos.");
+
+                        // Guardar para el loop (sendData)
+                        descargas.push_front("{\"descarga\":\"" + sensor.second.ID + "\",\"date\":\"" + fecha_y_hora + "\",\"type\":\"" + sensor.second.type + "\"}");
+                        
+                        // Activamos bandera de bloqueo (Lockout) para evitar repeticiones
+                        sensor.second.bandera = 1; 
+                        sensor.second.inicio = millis(); // Reutilizamos inicio para el tiempo de bloqueo
                     }
-                    
-                    // Tiempo de espera para evitar re-detección (Lockout)
-                    delay(1000); 
                     sensor.second.activo = false;
+                    sensor.second.pulsos = 0;
+                }
+            }
+
+            // 4. Lógica de bloqueo (Reemplaza el flag_time de ciclos por tiempo real)
+            if (sensor.second.bandera == 1)
+            {
+                if (millis() - sensor.second.inicio > LOCKOUT_TIEMPO)
+                {
+                    sensor.second.bandera = 0;
                 }
             }
         }
+        yield(); // Permite que el sistema gestione otras tareas de fondo
     }
 }
 
