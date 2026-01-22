@@ -116,39 +116,40 @@ void setup()
 		0);			/* Core where the task should run */
 }
 
-void task0(void *parameter)
-{
+void task0(void *parameter) {
+    for (;;) {
+        for (auto &sensor : sensores) {
+            bool lectura = digitalRead(sensor.first);
+            
+            // Si detecta el primer pulso, inicia una ventana de observación
+            if (lectura && !sensor.second.activo) {
+                sensor.second.activo = true;
+                sensor.second.inicioDeteccion = millis();
+                sensor.second.pulsos = 0;
+            }
 
-	for (;;)
-	{
+            // Durante los próximos 250ms, cuenta cuántos pulsos hay
+            if (sensor.second.activo) {
+                if (lectura) sensor.second.pulsos++;
 
-		for (auto &sensor : sensores)
-		{
-			if (digitalRead(sensor.first) && sensor.second.bandera == 0)
-			{
-				fecha_y_hora = getDateTime();
-
-				//Descargas.push_front("sensorID=" + sensor.second.ID + "&dischargeTime=" + fecha_y_hora);
-
-				//descargas.push_front("{\"descarga\":\"" + sensor.second.ID + "\",\"date\":\"" + fecha_y_hora + "\",\"type\":\"" + sensor.second.type + "\"}");
-
-				Serial.println("Descarga del sensor: " + sensor.second.ID + "\t Hora: " + fecha_y_hora + "\n");
-
-				sensor.second.bandera = 1;
-			}
-
-			if (sensor.second.bandera > 0 && sensor.second.bandera < flag_time)
-			{
-				++sensor.second.bandera;
-			}
-			else
-			{
-				sensor.second.bandera = 0;
-			}
-		}
-
-	}
-	
+                if (millis() - sensor.second.inicioDeteccion > 250) {
+                    // Aquí termina la ventana. 
+                    // Si pulsos > Umbral, es una posible descarga.
+                    if (sensor.second.pulsos > 50) { 
+                        // LÓGICA DE VETO: Comparar con vecinos antes de confirmar
+                        Serial.printf("Sensor %s validado con %d pulsos\n", 
+                                      sensor.second.ID.c_str(), sensor.second.pulsos);
+                        
+                        // Agregar a la lista para enviar...
+                    }
+                    
+                    // Tiempo de espera para evitar re-detección (Lockout)
+                    delay(1000); 
+                    sensor.second.activo = false;
+                }
+            }
+        }
+    }
 }
 
 void loop()
