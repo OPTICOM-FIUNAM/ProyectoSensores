@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 
 # Cambia COMXX por el puerto de tu ESP32 (por ejemplo, COM5 o /dev/ttyUSB0)
-puerto = "COM6"
+puerto = "/dev/ttyUSB0"
 baudrate = 115200
 
 ahora = datetime.now() #Obtencion de la hora para generación de archivos distintos cada vez
@@ -14,7 +14,7 @@ timestamp = ahora.strftime("%Y-%m-%d_%H-%M-%S")  # Formato: 2025-06-20_23-15-00
 
 # Crea el nombre del archivo
 nombre_archivo = f"vibracion_{timestamp}.txt"
-ruta = "C:/Users/Antonio Falcon/Documents/Servicio/ProyectoSensores/ESP32/Analisis_vibraciones/PYTHON/Documentacion_ESP32" #Ruta de la carpeta
+ruta = "/home/optiserver/Documents/ProyectoSensores/ESP32/Documentación" #Ruta de la carpeta
 ruta_completa = os.path.join(ruta, nombre_archivo)
 
 archivo = open(ruta_completa, "w") #Abrir en modo escritura "w"
