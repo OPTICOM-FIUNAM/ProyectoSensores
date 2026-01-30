@@ -13,7 +13,7 @@ TELEGRAM_CHAT_ID = "5607220799"
 
 # MODIFICA ESTE VALOR PARA EL PERIODO DE GUARDADO
 # (Ejemplo: 3600 = 1 hora, 7200 = 2 horas, 1800 = 30 min)
-INTERVALO_GUARDADO_SEG = 60  
+INTERVALO_GUARDADO_SEG = 1800  
 
 # Tiempo de inactividad para disparar la alerta (600 = 10 min)
 TIEMPO_ALERTA_INACTIVIDAD = 600 
@@ -102,28 +102,45 @@ def get_status():
     sensors_list = []
     for p in PINES:
         s = estado_sensores[str(p)]
-        is_active = (ahora - s["last_seen"] < 3)
+        # Aumentamos a 10 seg la visibilidad del "brillo" en la web
+        is_active = (ahora - s["last_seen"] < 10) 
         sensors_list.append({"active": is_active, "intensity": s["intensity"], "count": s["count"]})
-    return jsonify({"sensors": sensors_list, "total_global": total_global})
-
+    
+    # Enviamos también los últimos 10 eventos al dashboard
+    return jsonify({
+        "sensors": sensors_list, 
+        "total_global": total_global,
+        "recientes": historial_reciente[-10:] # Enviamos solo los últimos 10
+    })
 @app.route('/descarga', methods=['POST'])
 def recibir_descarga():
     global total_global, ultima_comunicacion
     try:
         data = request.get_json()
         sid = data.get('sensor').replace("ID_", "")
+        intensidad = data.get('intensidad')
+        hora_actual = datetime.now().strftime('%H:%M:%S')
+        
         ultima_comunicacion = time.time() 
         with lock:
             total_global += 1
             if sid in estado_sensores:
                 estado_sensores[sid]["count"] += 1
                 estado_sensores[sid]["last_seen"] = time.time()
-                estado_sensores[sid]["intensity"] = data.get('intensidad')
-            buffer_descargas.append([datetime.now().strftime('%H:%M:%S'), sid, data.get('intensidad')])
+                estado_sensores[sid]["intensity"] = intensidad
+            
+            # Guardamos para el CSV
+            buffer_descargas.append([hora_actual, sid, intensidad])
+            
+            # Guardamos para la vista web (Formato amigable)
+            historial_reciente.append({"hora": hora_actual, "sensor": sid, "intensidad": intensidad})
+            if len(historial_reciente) > 50: historial_reciente.pop(0) # Limpiar historial viejo
+
         return jsonify({"status": "ok"}), 200
-    except Exception as e:
+    except:
         return jsonify({"status": "error"}), 500
 
+# ... (El resto de hilos de guardado y watchdog se mantienen igual)
 if __name__ == '__main__':
     ip_local = obtener_ip_local()
     print(f"\n🚀 Servidor activo en http://{ip_local}:5000")

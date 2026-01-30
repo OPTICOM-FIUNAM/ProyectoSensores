@@ -50,25 +50,31 @@
 
     <script>
         function updateDashboard() {
-            fetch('/status')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('total-count').innerText = data.total_global;
-                    document.getElementById('filename').innerText = data.current_file;
-                    data.sensors.forEach((s, index) => {
-                        const card = document.getElementById(`sensor-${index}`);
-                        const valText = document.getElementById(`val-${index}`);
-                        const countText = document.getElementById(`count-${index}`);
-                        countText.innerText = s.count;
-                        if (s.active) {
-                            card.classList.add('active');
-                            valText.innerText = "¡FLUJO! (" + s.intensity + ")";
-                        } else {
-                            card.classList.remove('active');
-                            valText.innerText = "REPOSO";
-                        }
-                    });
-                }).catch(err => console.error("Error de conexión"));
+            // Dentro de tu función de actualización (ej. cada 2 segundos)
+fetch('/status')
+    .then(response => response.json())
+    .then(data => {
+        // 1. Actualizar contador global
+        document.getElementById('total').innerText = data.total_global;
+
+        // 2. Actualizar la tabla de actividad reciente
+        let tablaHTML = "";
+        data.recientes.reverse().forEach(ev => {
+            tablaHTML += `<tr>
+                <td>${ev.hora}</td>
+                <td>Sensor ${ev.sensor}</td>
+                <td>${ev.intensidad} pulsos</td>
+            </tr>`;
+        });
+        document.getElementById('cuerpo-tabla').innerHTML = tablaHTML;
+
+        // 3. Iluminar sensores activos
+        data.sensors.forEach((s, index) => {
+            let led = document.getElementById('led-' + index);
+            if(s.active) led.classList.add('active');
+            else led.classList.remove('active');
+        });
+    });
         }
         setInterval(updateDashboard, 1000);
     </script>
