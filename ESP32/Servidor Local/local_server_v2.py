@@ -23,8 +23,8 @@ PINES = [12, 13, 14, 15, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33, 34, 35]
 estado_sensores = {str(p): {"active": False, "intensity": 0, "last_seen": 0, "count": 0} for p in PINES}
 total_global = 0
 buffer_descargas = []
+historial_reciente = [] # <--- NUEVO: Para mostrar en la página
 ultima_comunicacion = time.time()
-alerta_enviada = False
 lock = threading.Lock()
 
 def enviar_telegram(mensaje):
