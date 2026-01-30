@@ -5,14 +5,19 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# --- CONFIGURACIÓN DE TELEGRAM ---
+# ==========================================================
+#                  CONFIGURACIÓN PRINCIPAL
+# ==========================================================
 TELEGRAM_TOKEN = "8277379621:AAEmbl-Vg95NXZ9OQVE2sJByK0ppyk12Q5k"
 TELEGRAM_CHAT_ID = "5607220799"
 
-# --- TIEMPOS DE CONTROL ---
-INTERVALO_GUARDADO = 7200  # 2 horas en segundos
-TIEMPO_ALERTA_MS = 600     # 10 minutos de inactividad
-# -------------------------
+# MODIFICA ESTE VALOR PARA EL PERIODO DE GUARDADO
+# (Ejemplo: 3600 = 1 hora, 7200 = 2 horas, 1800 = 30 min)
+INTERVALO_GUARDADO_SEG = 60  
+
+# Tiempo de inactividad para disparar la alerta (600 = 10 min)
+TIEMPO_ALERTA_INACTIVIDAD = 600 
+# ==========================================================
 
 PINES = [12, 13, 14, 15, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33, 34, 35]
 estado_sensores = {str(p): {"active": False, "intensity": 0, "last_seen": 0, "count": 0} for p in PINES}
@@ -40,34 +45,48 @@ def obtener_ip_local():
     finally: s.close()
     return IP
 
-def hilo_guardado_cada_2h():
-    """Genera un archivo nuevo y limpia el buffer cada 2 horas."""
+def hilo_guardado_ciclico():
+    """Genera un archivo nuevo y avisa por Telegram cada X tiempo."""
     global buffer_descargas
     while True:
-        time.sleep(INTERVALO_GUARDADO) 
+        # Aquí es donde el script "duerme" durante el periodo configurado
+        time.sleep(INTERVALO_GUARDADO_SEG) 
+        
         with lock:
             if buffer_descargas:
                 timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M')
-                nombre_archivo = f"reporte_2h_{timestamp}.csv"
+                nombre_archivo = f"reporte_{timestamp}.csv"
+                
+                # Guardar el archivo
                 with open(nombre_archivo, mode='w', newline='') as f:
                     writer = csv.writer(f)
                     writer.writerow(['Hora', 'Sensor', 'Pulsos'])
                     writer.writerows(buffer_descargas)
                 
-                enviar_telegram(f"✅ Reporte generado: {nombre_archivo}\nTotal descargas: {len(buffer_descargas)}")
-                buffer_descargas.clear() # Limpiamos para el siguiente bloque de 2 horas
-                print(f"[SISTEMA] Archivo de 2 horas generado: {nombre_archivo}")
+                # --- AVISO POR TELEGRAM AL GENERAR EL ARCHIVO ---
+                msg_confirmacion = (
+                    f"✅ *NUEVO REPORTE GENERADO*\n"
+                    f"📄 Archivo: `{nombre_archivo}`\n"
+                    f"📊 Eventos en este periodo: {len(buffer_descargas)}\n"
+                    f"📈 Total histórico: {total_global}"
+                )
+                enviar_telegram(msg_confirmacion)
+                # -----------------------------------------------
+                
+                buffer_descargas.clear() # Limpiar buffer para el siguiente periodo
+                print(f"[SISTEMA] Reporte enviado y guardado: {nombre_archivo}")
+            else:
+                enviar_telegram("ℹ️ Periodo cumplido, pero no hubo descargas registradas.")
 
 def hilo_watchdog():
     """Vigila si la ESP32 deja de enviar datos."""
     global alerta_enviada
     while True:
-        time.sleep(30) # Revisa cada 30 segundos
+        time.sleep(30)
         ahora = time.time()
-        if (ahora - ultima_comunicacion) > TIEMPO_ALERTA_MS:
+        if (ahora - ultima_comunicacion) > TIEMPO_ALERTA_INACTIVIDAD:
             if not alerta_enviada:
-                msg = "⚠️ ¡ALERTA! La ESP32 no ha enviado datos en los últimos 10 minutos. Revisa la conexión."
-                print(msg)
+                msg = "⚠️ ¡ALERTA! No se reciben datos de la ESP32 hace 10 minutos."
                 enviar_telegram(msg)
                 alerta_enviada = True
         else:
@@ -93,7 +112,7 @@ def recibir_descarga():
     try:
         data = request.get_json()
         sid = data.get('sensor').replace("ID_", "")
-        ultima_comunicacion = time.time() # Resetear reloj de vida
+        ultima_comunicacion = time.time() 
         with lock:
             total_global += 1
             if sid in estado_sensores:
@@ -108,10 +127,9 @@ def recibir_descarga():
 if __name__ == '__main__':
     ip_local = obtener_ip_local()
     print(f"\n🚀 Servidor activo en http://{ip_local}:5000")
-    enviar_telegram(f"🟢 Servidor de Monitoreo Iniciado en IP: {ip_local}")
+    enviar_telegram(f"🟢 Sistema de Monitoreo Online\n📍 IP: {ip_local}")
 
-    # Iniciar los dos hilos de control
-    threading.Thread(target=hilo_guardado_cada_2h, daemon=True).start()
+    threading.Thread(target=hilo_guardado_ciclico, daemon=True).start()
     threading.Thread(target=hilo_watchdog, daemon=True).start()
     
     app.run(host='0.0.0.0', port=5000, debug=False)
