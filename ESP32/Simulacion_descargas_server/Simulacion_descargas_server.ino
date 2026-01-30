@@ -7,12 +7,17 @@ const char* ssid = "ASUS_sensores_2026";
 const char* password = "Opticom_sensores_2026";
 const char* serverUrl = "http://192.168.10.201:5000/descarga";
 
+// ==========================================================
+//              CONFIGURACIÓN DE LA SIMULACIÓN
+// ==========================================================
+const int DESCARGAS_POR_HORA = 200; // <--- CAMBIA ESTE NÚMERO AQUÍ
+// ==========================================================
+
 // --- PARÁMETROS DE FILTRADO ---
 const int VENTANA_MS = 250;
 const int UMBRAL_PULSOS = 45;
 const int LOCKOUT_MS = 2000;
 
-// --- VARIABLES PARA SIMULACIÓN ---
 unsigned long proximoEnvioSimulado = 0;
 
 struct Sensor {
@@ -29,19 +34,28 @@ int pines[] = {12, 13, 14, 15, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33, 34, 35};
 
 TaskHandle_t TaskSensing;
 
+// Función para calcular el siguiente intervalo aleatorio basado en la meta/hora
+long calcularSiguienteIntervalo() {
+    // 3600 segundos tiene una hora. 
+    // Dividimos 3600 / descargas para obtener el intervalo promedio en segundos.
+    long promedioSegundos = 3600 / DESCARGAS_POR_HORA;
+    
+    // Creamos un rango de +/- 20% para que no parezca un reloj exacto
+    long minSeg = promedioSegundos * 0.8;
+    long maxSeg = promedioSegundos * 1.2;
+    
+    return random(minSeg, maxSeg + 1);
+}
+
 void setup() {
     Serial.begin(115200);
-    
-    // Inicializar semilla aleatoria para la simulación
     randomSeed(analogRead(0));
 
-    // Inicializar sensores
     for (int p : pines) {
         pinMode(p, INPUT);
         sensores[p] = {"ID_" + String(p), p, 0, 0, false, 0};
     }
 
-    // Conexión WiFi
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(200);
@@ -49,11 +63,10 @@ void setup() {
     }
     Serial.println("\nWiFi Conectado. IP: " + WiFi.localIP().toString());
 
-    // Crear tarea en Core 0 para el sensado real
     xTaskCreatePinnedToCore(sensingLogic, "SensingTask", 10000, NULL, 1, &TaskSensing, 0);
     
-    // Programar el primer envío simulado
-    proximoEnvioSimulado = millis() + (random(180, 241) * 1000);
+    // Programar primer envío
+    proximoEnvioSimulado = millis() + (calcularSiguienteIntervalo() * 1000);
 }
 
 void sensingLogic(void * pvParameters) {
@@ -62,7 +75,6 @@ void sensingLogic(void * pvParameters) {
         for (auto &it : sensores) {
             Sensor &s = it.second;
             bool lectura = digitalRead(s.pin);
-
             if (ahora > s.tiempoBloqueo) {
                 if (lectura && !s.evaluando) {
                     s.evaluando = true;
@@ -90,11 +102,9 @@ void notificarDescarga(String id, int intensidad) {
         HTTPClient http;
         http.begin(serverUrl);
         http.addHeader("Content-Type", "application/json");
-
         String json = "{\"sensor\":\"" + id + "\", \"intensidad\":" + String(intensidad) + "}";
         int httpResponseCode = http.POST(json);
-        
-        Serial.printf("EVENTO en %s (Intensidad: %d). Server: %d\n", id.c_str(), intensidad, httpResponseCode);
+        Serial.printf("ENVÍO: %s | Resp: %d\n", id.c_str(), httpResponseCode);
         http.end();
     }
 }
@@ -102,26 +112,17 @@ void notificarDescarga(String id, int intensidad) {
 void loop() {
     unsigned long ahora = millis();
 
-    // LÓGICA DE SIMULACIÓN PARA FIN DE SEMANA
     if (ahora >= proximoEnvioSimulado) {
-        // 1. Elegir sensor aleatorio de los 16 disponibles
         int indice = random(0, 16);
-        int pinSimulado = pines[indice];
-        String idSimulado = "ID_" + String(pinSimulado);
-        
-        // 2. Generar intensidad aleatoria por encima del umbral
-        int intensidadSimulada = random(UMBRAL_PULSOS, 180);
+        String idSimulado = "ID_" + String(pines[indice]);
+        int intensidadSimulada = random(UMBRAL_PULSOS, 150);
 
-        Serial.print("[SIMULACIÓN ACTIVADA] ");
+        Serial.print("[MODO SIMULACIÓN] ");
         notificarDescarga(idSimulado, intensidadSimulada);
 
-        // 3. Programar siguiente envío (entre 3 y 4 minutos para dar 15-20 por hora)
-        long siguienteIntervalo = random(180, 241);
-        proximoEnvioSimulado = ahora + (siguienteIntervalo * 1000);
-        
-        Serial.printf("Próximo dato ficticio en %ld segundos.\n", siguienteIntervalo);
+        long espera = calcularSiguienteIntervalo();
+        proximoEnvioSimulado = ahora + (espera * 1000);
+        Serial.printf("Esperando %ld segundos para el siguiente dato ficticio.\n", espera);
     }
-
-    // Pequeño retardo para no saturar el Core 1
     delay(1000);
 }

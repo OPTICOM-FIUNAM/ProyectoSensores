@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoreo IoT Móvil</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; text-align: center; margin: 0; padding: 10px; }
+        
+        .stats-container { background: #1e1e1e; padding: 15px; margin-bottom: 20px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        #total-count { font-size: 3em; color: #00e676; font-weight: bold; display: block; }
+        
+        /* Cuadrícula responsiva inteligente */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 12px; 
+            padding: 10px; 
+        }
+
+        .sensor-card { background: #252525; padding: 15px; border-radius: 12px; border: 1px solid #333; position: relative; overflow: hidden; }
+        .active { background: #0061ff; border-color: #00d4ff; animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 97, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 97, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 97, 255, 0); }
+        }
+
+        .count-label { font-size: 0.8em; color: #999; margin-top: 10px; border-top: 1px solid #333; padding-top: 5px; }
+        #filename { color: #ffa726; font-size: 0.9em; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <div class="stats-container">
+        <span id="total-count">0</span>
+        <div style="color: #888;">Descargas Totales</div>
+        <div style="margin-top: 10px; font-size: 0.75em;">LOG: <span id="filename">---</span></div>
+    </div>
+    
+    <div class="grid" id="sensor-grid">
+        {% for i in range(16) %}
+        <div id="sensor-{{i}}" class="sensor-card">
+            <div style="font-size: 0.7em; color: #777;">PIN {{pines[i]}}</div>
+            <div id="val-{{i}}" style="margin: 5px 0; font-weight: bold;">REPOSO</div>
+            <div class="count-label">Total: <span id="count-{{i}}" style="color: #00e5ff;">0</span></div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function updateDashboard() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-count').innerText = data.total_global;
+                    document.getElementById('filename').innerText = data.current_file;
+                    data.sensors.forEach((s, index) => {
+                        const card = document.getElementById(`sensor-${index}`);
+                        const valText = document.getElementById(`val-${index}`);
+                        const countText = document.getElementById(`count-${index}`);
+                        countText.innerText = s.count;
+                        if (s.active) {
+                            card.classList.add('active');
+                            valText.innerText = "¡FLUJO! (" + s.intensity + ")";
+                        } else {
+                            card.classList.remove('active');
+                            valText.innerText = "REPOSO";
+                        }
+                    });
+                }).catch(err => console.error("Error de conexión"));
+        }
+        setInterval(updateDashboard, 1000);
+    </script>
+</body>
+</html>
