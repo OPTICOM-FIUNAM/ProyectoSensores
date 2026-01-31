@@ -36,6 +36,31 @@ def obtener_ip_local():
     except: return '127.0.0.1'
     finally: s.close()
 
+def hilo_guardado_ciclico():
+    """Genera un archivo nuevo y avisa por Telegram cada X tiempo."""
+    global buffer_descargas
+    while True:
+        time.sleep(INTERVALO_GUARDADO_SEG) 
+        with lock:
+            if buffer_descargas:
+                timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M')
+                nombre_archivo = f"reporte_{timestamp}.csv"
+                ruta_archivo = os.path.join(NOMBRE_CARPETA, nombre_archivo)
+                
+                # Guardar el archivo
+                with open(ruta_archivo, mode='w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(['Hora', 'Sensor', 'Pulsos'])
+                    writer.writerows(buffer_descargas)
+                
+                # Notificación a Telegram
+                enviar_telegram(f"✅ *REPORTE GENERADO*\n📄 `{nombre_archivo}`\n📊 Eventos: {len(buffer_descargas)}\n📈 Total: {total_global}")
+                
+                buffer_descargas.clear() 
+                print(f"[SISTEMA] Reporte guardado: {nombre_archivo}")
+            else:
+                print("[SISTEMA] Periodo cumplido sin datos nuevos.")
+
 @app.route('/')
 def index(): return render_template('dashboard.html', pines=PINES)
 
@@ -97,5 +122,17 @@ if __name__ == '__main__':
     print(f"Enviando notificación de arranque a Telegram...")
     enviar_telegram(f"🖥️ *SERVIDOR INICIADO*\n📍 IP: `{mi_ip}`\n📁 Logs: `{NOMBRE_CARPETA}`")
     
+    print(f"🚀 Dashboard: http://{mi_ip}:5000")
+    if __name__ == '__main__':
+    if not os.path.exists(NOMBRE_CARPETA): os.makedirs(NOMBRE_CARPETA)
+    
+    mi_ip = obtener_ip_local()
+    print(f"Enviando notificación de arranque a Telegram...")
+    enviar_telegram(f"🖥️ *SERVIDOR INICIADO*\n📍 IP: `{mi_ip}`")
+    
+    # --- AÑADE ESTA LÍNEA AQUÍ ---
+    threading.Thread(target=hilo_guardado_ciclico, daemon=True).start()
+    # -----------------------------
+
     print(f"🚀 Dashboard: http://{mi_ip}:5000")
     app.run(host='0.0.0.0', port=5000, debug=False)

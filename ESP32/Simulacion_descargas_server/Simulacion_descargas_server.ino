@@ -18,7 +18,7 @@ WebServer server_esp(80);
 
 void handleReset() {
     server_esp.send(200, "text/plain", "Reiniciando...");
-    delay(1000);
+    delay(500);
     ESP.restart();
 }
 
@@ -149,5 +149,4 @@ void loop() {
         proximoEnvioSimulado = ahora + (espera * 1000);
         Serial.printf("Esperando %ld segundos para el siguiente dato ficticio.\n", espera);
     }
-    delay(1000);
 }
