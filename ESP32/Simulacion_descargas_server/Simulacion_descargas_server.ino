@@ -1,19 +1,28 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <map>
+#include <WebServer.h>
 
 // --- CONFIGURACIÓN DE RED ---
-const char* ssid = "ASUS_sensores_2026";
-const char* password = "Opticom_sensores_2026";
-const char* serverUrl = "http://192.168.10.201:5000/descarga";
+const char* ssid = "IZZI-0E2C";
+const char* password = "Z44A0DPQVGTY";
 
 // ==========================================================
-//              CONFIGURACIÓN DE LA SIMULACIÓN
+// CENTRALIZACIÓN DE SERVIDOR (Cambia solo esto)
 // ==========================================================
-const int DESCARGAS_POR_HORA = 200; // <--- CAMBIA ESTE NÚMERO AQUÍ
+const char* serverIP = "192.168.0.50"; 
+const String baseAddr = "http://" + String(serverIP) + ":5000";
 // ==========================================================
 
-// --- PARÁMETROS DE FILTRADO ---
+WebServer server_esp(80); 
+
+void handleReset() {
+    server_esp.send(200, "text/plain", "Reiniciando...");
+    delay(1000);
+    ESP.restart();
+}
+
+const int DESCARGAS_POR_HORA = 200;
 const int VENTANA_MS = 250;
 const int UMBRAL_PULSOS = 45;
 const int LOCKOUT_MS = 2000;
@@ -31,20 +40,30 @@ struct Sensor {
 
 std::map<int, Sensor> sensores;
 int pines[] = {12, 13, 14, 15, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33, 34, 35};
-
 TaskHandle_t TaskSensing;
 
-// Función para calcular el siguiente intervalo aleatorio basado en la meta/hora
 long calcularSiguienteIntervalo() {
-    // 3600 segundos tiene una hora. 
-    // Dividimos 3600 / descargas para obtener el intervalo promedio en segundos.
     long promedioSegundos = 3600 / DESCARGAS_POR_HORA;
-    
-    // Creamos un rango de +/- 20% para que no parezca un reloj exacto
     long minSeg = promedioSegundos * 0.8;
     long maxSeg = promedioSegundos * 1.2;
-    
     return random(minSeg, maxSeg + 1);
+}
+
+void anunciarPresencia() {
+    if (WiFi.status() == WL_CONNECTED) {
+        HTTPClient http;
+        String urlInicio = baseAddr + "/inicio"; // Usa la dirección global
+        http.begin(urlInicio);
+        http.addHeader("Content-Type", "application/json");
+
+        String json = "{\"mensaje\":\"ESP32 Online\", \"ip\":\"" + WiFi.localIP().toString() + "\"}";
+        int httpResponseCode = http.POST(json);
+
+        if (httpResponseCode > 0) {
+            Serial.println("✅ Notificación de inicio enviada al servidor.");
+        }
+        http.end();
+    }
 }
 
 void setup() {
@@ -58,15 +77,19 @@ void setup() {
 
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
-        delay(200);
+        delay(500);
         Serial.print(".");
     }
     Serial.println("\nWiFi Conectado. IP: " + WiFi.localIP().toString());
 
+    // NOTIFICAR AL SERVIDOR (Ahora que ya hay WiFi)
+    anunciarPresencia();
+
     xTaskCreatePinnedToCore(sensingLogic, "SensingTask", 10000, NULL, 1, &TaskSensing, 0);
     
-    // Programar primer envío
     proximoEnvioSimulado = millis() + (calcularSiguienteIntervalo() * 1000);
+    server_esp.on("/reset", HTTP_GET, handleReset); 
+    server_esp.begin();
 }
 
 void sensingLogic(void * pvParameters) {
@@ -100,7 +123,8 @@ void sensingLogic(void * pvParameters) {
 void notificarDescarga(String id, int intensidad) {
     if (WiFi.status() == WL_CONNECTED) {
         HTTPClient http;
-        http.begin(serverUrl);
+        String urlDescarga = baseAddr + "/descarga"; // Usa la dirección global
+        http.begin(urlDescarga);
         http.addHeader("Content-Type", "application/json");
         String json = "{\"sensor\":\"" + id + "\", \"intensidad\":" + String(intensidad) + "}";
         int httpResponseCode = http.POST(json);
@@ -111,6 +135,7 @@ void notificarDescarga(String id, int intensidad) {
 
 void loop() {
     unsigned long ahora = millis();
+    server_esp.handleClient(); 
 
     if (ahora >= proximoEnvioSimulado) {
         int indice = random(0, 16);
