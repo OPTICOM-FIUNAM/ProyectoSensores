@@ -5,21 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoreo IoT Móvil</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; text-align: center; margin: 0; padding: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: white; text-align: center; margin: 0; padding: 10px; }
+        .stats-container { background: #1e1e1e; padding: 15px; margin-bottom: 20px; border-radius: 15px; border: 1px solid #333; }
+        #total-count { font-size: 3em; color: #00e676; font-weight: bold; }
         
-        .stats-container { background: #1e1e1e; padding: 15px; margin-bottom: 20px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        #total-count { font-size: 3em; color: #00e676; font-weight: bold; display: block; }
-        
-        /* Cuadrícula responsiva inteligente */
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
-            gap: 12px; 
-            padding: 10px; 
-        }
+        /* Estado de conexión */
+        .status-bar { margin-bottom: 15px; font-size: 0.9em; padding: 5px; border-radius: 5px; background: #252525; }
 
-        .sensor-card { background: #252525; padding: 15px; border-radius: 12px; border: 1px solid #333; position: relative; overflow: hidden; }
-        .active { background: #0061ff; border-color: #00d4ff; animation: pulse 1.5s infinite; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; padding: 10px; }
+        .sensor-card { background: #252525; padding: 15px; border-radius: 12px; border: 1px solid #333; transition: 0.3s; }
+        
+        /* Clase para cuando el sensor detecta algo */
+        .active { background: #0061ff !important; border-color: #00d4ff; animation: pulse 1.5s infinite; }
         
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 97, 255, 0.7); }
@@ -28,14 +25,22 @@
         }
 
         .count-label { font-size: 0.8em; color: #999; margin-top: 10px; border-top: 1px solid #333; padding-top: 5px; }
-        #filename { color: #ffa726; font-size: 0.9em; word-break: break-all; }
+        
+        /* Tabla de actividad reciente */
+        .history-container { margin-top: 20px; background: #1e1e1e; padding: 10px; border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
+        th { color: #888; border-bottom: 1px solid #333; padding: 5px; }
+        td { padding: 8px; border-bottom: 1px solid #252525; }
     </style>
 </head>
 <body>
+
     <div class="stats-container">
+        <div class="status-bar">
+            Estado: <span id="esp-status">Cargando...</span>
+        </div>
         <span id="total-count">0</span>
         <div style="color: #888;">Descargas Totales</div>
-        <div style="margin-top: 10px; font-size: 0.75em;">LOG: <span id="filename">---</span></div>
     </div>
     
     <div class="grid" id="sensor-grid">
@@ -48,34 +53,75 @@
         {% endfor %}
     </div>
 
+    <div class="history-container">
+        <h3>Últimos Eventos</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    <th>Sensor</th>
+                    <th>Pulsos</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpo-tabla">
+                </tbody>
+        </table>
+    </div>
+
     <script>
         function updateDashboard() {
-            // Dentro de tu función de actualización (ej. cada 2 segundos)
-fetch('/status')
-    .then(response => response.json())
-    .then(data => {
-        // 1. Actualizar contador global
-        document.getElementById('total').innerText = data.total_global;
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    // 1. Sincronización de Conexión
+                    const statusText = document.getElementById('esp-status');
+                    if (data.esp_online) {
+                        statusText.innerText = "● Conectado (" + data.esp_ip + ")";
+                        statusText.style.color = "#00e676";
+                    } else {
+                        statusText.innerText = "○ Desconectado";
+                        statusText.style.color = "#ff5252";
+                    }
 
-        // 2. Actualizar la tabla de actividad reciente
-        let tablaHTML = "";
-        data.recientes.reverse().forEach(ev => {
-            tablaHTML += `<tr>
-                <td>${ev.hora}</td>
-                <td>Sensor ${ev.sensor}</td>
-                <td>${ev.intensidad} pulsos</td>
-            </tr>`;
-        });
-        document.getElementById('cuerpo-tabla').innerHTML = tablaHTML;
+                    // 2. Contador Global (ID corregido)
+                    document.getElementById('total-count').innerText = data.total_global;
 
-        // 3. Iluminar sensores activos
-        data.sensors.forEach((s, index) => {
-            let led = document.getElementById('led-' + index);
-            if(s.active) led.classList.add('active');
-            else led.classList.remove('active');
-        });
-    });
+                    // 3. Tabla de actividad (ID corregido)
+                    let tablaHTML = "";
+                    data.recientes.slice().reverse().forEach(ev => {
+                        tablaHTML += `<tr>
+                            <td>${ev.hora}</td>
+                            <td>ID_${ev.sensor}</td>
+                            <td>${ev.intensidad}</td>
+                        </tr>`;
+                    });
+                    document.getElementById('cuerpo-tabla').innerHTML = tablaHTML;
+
+                    // 4. Sensores y sus estados individuales
+                    data.sensors.forEach((s, index) => {
+                        const card = document.getElementById('sensor-' + index);
+                        const valText = document.getElementById('val-' + index);
+                        const countText = document.getElementById('count-' + index);
+
+                        if (card) {
+                            // Actualizar contador individual
+                            countText.innerText = s.count;
+
+                            if (s.active) {
+                                card.classList.add('active');
+                                valText.innerText = s.intensity + " PULSOS";
+                                valText.style.color = "white";
+                            } else {
+                                card.classList.remove('active');
+                                valText.innerText = "REPOSO";
+                                valText.style.color = "#555";
+                            }
+                        }
+                    });
+                })
+                .catch(err => console.error("Error:", err));
         }
+
         setInterval(updateDashboard, 1000);
     </script>
 </body>
