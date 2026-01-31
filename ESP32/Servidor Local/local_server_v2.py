@@ -9,7 +9,8 @@ app = Flask(__name__)
 TELEGRAM_TOKEN = "8277379621:AAEmbl-Vg95NXZ9OQVE2sJByK0ppyk12Q5k"
 TELEGRAM_CHAT_ID = "5607220799"
 NOMBRE_CARPETA = "logs_reportes"
-INTERVALO_GUARDADO_SEG = 1800  # 30 min
+MINUTES = 5
+INTERVALO_GUARDADO_SEG = (60*MINUTES)  # 30 min
 
 PINES = [12, 13, 14, 15, 18, 19, 21, 22, 23, 25, 26, 27, 32, 33, 34, 35]
 estado_sensores = {str(p): {"active": False, "intensity": 0, "last_seen": 0, "count": 0} for p in PINES}
