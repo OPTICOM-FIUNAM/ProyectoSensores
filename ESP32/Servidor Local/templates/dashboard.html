@@ -9,13 +9,10 @@
         .stats-container { background: #1e1e1e; padding: 15px; margin-bottom: 20px; border-radius: 15px; border: 1px solid #333; }
         #total-count { font-size: 3em; color: #00e676; font-weight: bold; }
         
-        /* Estado de conexión */
         .status-bar { margin-bottom: 15px; font-size: 0.9em; padding: 5px; border-radius: 5px; background: #252525; }
-
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; padding: 10px; }
         .sensor-card { background: #252525; padding: 15px; border-radius: 12px; border: 1px solid #333; transition: 0.3s; }
         
-        /* Clase para cuando el sensor detecta algo */
         .active { background: #0061ff !important; border-color: #00d4ff; animation: pulse 1.5s infinite; }
         
         @keyframes pulse {
@@ -26,7 +23,12 @@
 
         .count-label { font-size: 0.8em; color: #999; margin-top: 10px; border-top: 1px solid #333; padding-top: 5px; }
         
-        /* Tabla de actividad reciente */
+        /* Panel de Control de Reinicio */
+        .control-panel { margin-top: 20px; padding: 15px; background: #1e1e1e; border-radius: 10px; border: 1px dashed #444; }
+        .btn-danger { background: #ff5252; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; max-width: 300px; }
+        .btn-danger:hover { background: #ff1744; }
+        .btn-danger:disabled { background: #555; cursor: not-allowed; }
+
         .history-container { margin-top: 20px; background: #1e1e1e; padding: 10px; border-radius: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
         th { color: #888; border-bottom: 1px solid #333; padding: 5px; }
@@ -53,6 +55,12 @@
         {% endfor %}
     </div>
 
+    <div class="control-panel">
+        <button id="btn-reinicio" class="btn-danger" onclick="confirmarReinicio()">
+            REINICIAR ESP32 AHORA
+        </button>
+    </div>
+
     <div class="history-container">
         <h3>Últimos Eventos</h3>
         <table>
@@ -63,8 +71,7 @@
                     <th>Pulsos</th>
                 </tr>
             </thead>
-            <tbody id="cuerpo-tabla">
-                </tbody>
+            <tbody id="cuerpo-tabla"></tbody>
         </table>
     </div>
 
@@ -73,7 +80,6 @@
             fetch('/status')
                 .then(response => response.json())
                 .then(data => {
-                    // 1. Sincronización de Conexión
                     const statusText = document.getElementById('esp-status');
                     if (data.esp_online) {
                         statusText.innerText = "● Conectado (" + data.esp_ip + ")";
@@ -83,43 +89,44 @@
                         statusText.style.color = "#ff5252";
                     }
 
-                    // 2. Contador Global (ID corregido)
                     document.getElementById('total-count').innerText = data.total_global;
 
-                    // 3. Tabla de actividad (ID corregido)
                     let tablaHTML = "";
                     data.recientes.slice().reverse().forEach(ev => {
-                        tablaHTML += `<tr>
-                            <td>${ev.hora}</td>
-                            <td>ID_${ev.sensor}</td>
-                            <td>${ev.intensidad}</td>
-                        </tr>`;
+                        tablaHTML += `<tr><td>${ev.hora}</td><td>ID_${ev.sensor}</td><td>${ev.intensidad}</td></tr>`;
                     });
                     document.getElementById('cuerpo-tabla').innerHTML = tablaHTML;
 
-                    // 4. Sensores y sus estados individuales
                     data.sensors.forEach((s, index) => {
                         const card = document.getElementById('sensor-' + index);
                         const valText = document.getElementById('val-' + index);
                         const countText = document.getElementById('count-' + index);
-
                         if (card) {
-                            // Actualizar contador individual
                             countText.innerText = s.count;
-
                             if (s.active) {
                                 card.classList.add('active');
                                 valText.innerText = s.intensity + " PULSOS";
-                                valText.style.color = "white";
                             } else {
                                 card.classList.remove('active');
                                 valText.innerText = "REPOSO";
-                                valText.style.color = "#555";
                             }
                         }
                     });
-                })
-                .catch(err => console.error("Error:", err));
+                });
+        }
+
+        function confirmarReinicio() {
+            if (confirm("¿Reiniciar hardware?")) {
+                const btn = document.getElementById('btn-reinicio');
+                btn.disabled = true;
+                btn.innerText = "Enviando...";
+                fetch('/mandar_reinicio', { method: 'POST' })
+                    .then(r => alert(r.ok ? "🚀 Orden enviada" : "❌ No responde"))
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerText = "REINICIAR ESP32 AHORA";
+                    });
+            }
         }
 
         setInterval(updateDashboard, 1000);
