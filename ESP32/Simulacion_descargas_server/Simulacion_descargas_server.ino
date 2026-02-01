@@ -22,7 +22,7 @@ void handleReset() {
     ESP.restart();
 }
 
-const int DESCARGAS_POR_HORA = 200;
+const int DESCARGAS_POR_HORA = 600;
 const int VENTANA_MS = 250;
 const int UMBRAL_PULSOS = 45;
 const int LOCKOUT_MS = 2000;
