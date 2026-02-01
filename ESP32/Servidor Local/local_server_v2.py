@@ -116,20 +116,13 @@ def mandar_reinicio():
     except: return jsonify({"status": "error"}), 500
 
 if __name__ == '__main__':
-    if not os.path.exists(NOMBRE_CARPETA): os.makedirs(NOMBRE_CARPETA)
+    if not os.path.exists(NOMBRE_CARPETA): 
+        os.makedirs(NOMBRE_CARPETA)
     
     mi_ip = obtener_ip_local()
     # ESTE ES EL MENSAJE QUE NO VEÍAS: Ahora se envía con confirmación en consola
     print(f"Enviando notificación de arranque a Telegram...")
     enviar_telegram(f"🖥️ *SERVIDOR INICIADO*\n📍 IP: `{mi_ip}`\n📁 Logs: `{NOMBRE_CARPETA}`")
-    
-    print(f"🚀 Dashboard: http://{mi_ip}:5000")
-    if __name__ == '__main__':
-    if not os.path.exists(NOMBRE_CARPETA): os.makedirs(NOMBRE_CARPETA)
-    
-    mi_ip = obtener_ip_local()
-    print(f"Enviando notificación de arranque a Telegram...")
-    enviar_telegram(f"🖥️ *SERVIDOR INICIADO*\n📍 IP: `{mi_ip}`")
     
     # --- AÑADE ESTA LÍNEA AQUÍ ---
     threading.Thread(target=hilo_guardado_ciclico, daemon=True).start()
