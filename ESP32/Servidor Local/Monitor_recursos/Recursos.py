@@ -7,8 +7,8 @@ import os
 # ==========================================
 #               CONFIGURACIÓN
 # ==========================================
-#CARPETA_DESTINO = "C:/Users/darki/Documents/ProyectoSensores-1/ESP32/Servidor Local/Monitor_recursos/reportes_sistema"
-CARPETA_DESTINO = ""
+
+CARPETA_DESTINO = "/home/optiserver/Documents/ProyectoSensores/ESP32/Servidor Local/Monitor_recursos/reportes_sistema"
 NOMBRE_ARCHIVO = "uso_recursos_alta_res.csv"
 INTERVALO_SEG = 1 
 
