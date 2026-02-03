@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # --- CONFIGURACIÓN ---
 TELEGRAM_TOKEN = "8277379621:AAEmbl-Vg95NXZ9OQVE2sJByK0ppyk12Q5k"
-TELEGRAM_CHAT_ID = "5607220799"
+TELEGRAM_CHAT_ID = ["5607220799", "-1003685218604"]
 NOMBRE_CARPETA = "logs_reportes"
 MINUTES = 5
 INTERVALO_GUARDADO_SEG = (60*MINUTES)  # 30 min
@@ -23,11 +23,19 @@ lock = threading.Lock()
 
 def enviar_telegram(mensaje):
     """Envía mensaje simple a Telegram."""
-    try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-        payload = {"chat_id": TELEGRAM_CHAT_ID, "text": mensaje, "parse_mode": "Markdown"}
-        requests.post(url, json=payload, timeout=5)
-    except: pass
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    for chat_id in TELEGRAM_CHAT_IDS:
+        try:
+            payload = {
+                "chat_id": chat_id, 
+                "text": mensaje, 
+                "parse_mode": "Markdown"
+            }
+            response = requests.post(url, json=payload, timeout=5)
+            if response.status_code != 200:
+                print(f"⚠️ Error enviando a {chat_id}: {response.text}")
+        except Exception as e:
+            print(f"❌ Fallo de conexión al enviar a {chat_id}: {e}")
 
 def obtener_ip_local():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

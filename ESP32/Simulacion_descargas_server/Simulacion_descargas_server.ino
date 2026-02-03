@@ -4,13 +4,16 @@
 #include <WebServer.h>
 
 // --- CONFIGURACIÓN DE RED ---
-const char* ssid = "IZZI-0E2C";
-const char* password = "Z44A0DPQVGTY";
+//const char* ssid = "IZZI-0E2C";
+//const char* password = "Z44A0DPQVGTY";
+const char* ssid = "ASUS_sensores_2026";
+const char* password = "Opticom_sensores_2026";
 
 // ==========================================================
 // CENTRALIZACIÓN DE SERVIDOR (Cambia solo esto)
 // ==========================================================
-const char* serverIP = "192.168.0.50"; 
+//const char* serverIP = "192.168.0.50"; 
+const char* serverIP = "10.66.66.178"; 
 const String baseAddr = "http://" + String(serverIP) + ":5000";
 // ==========================================================
 
