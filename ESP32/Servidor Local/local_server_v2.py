@@ -4,10 +4,13 @@ import threading, time, csv, os, socket
 from datetime import datetime
 
 app = Flask(__name__)
+#curl -X POST "https://api.telegram.org/bot8277379621:AAEmbl-Vg95NXZ9OQVE2sJByK0ppyk12Q5k/sendMessage" \
+#     -d "chat_id=-TU_ID_DE_GRUPO" \
+#     -d "text=Prueba de conexión desde la terminal de Debian"
 
 # --- CONFIGURACIÓN ---
 TELEGRAM_TOKEN = "8277379621:AAEmbl-Vg95NXZ9OQVE2sJByK0ppyk12Q5k"
-TELEGRAM_CHAT_ID = ["5607220799", "-1003685218604"]
+TELEGRAM_CHAT_IDS = ["5607220799", "-1003685218604"]
 NOMBRE_CARPETA = "logs_reportes"
 MINUTES = 5
 INTERVALO_GUARDADO_SEG = (60*MINUTES)  # 30 min
